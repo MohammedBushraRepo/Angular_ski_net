@@ -22,11 +22,16 @@ export class ShopComponent implements OnInit{
   products:Product[] = [];
 
   ngOnInit(): void {
+    this.initializeShope();
+  }
+  initializeShope(){
+   this.shopeService.getBrands();
+   this.shopeService.getTypes();
    this.shopeService.getProducts().subscribe({
-      next: response => this.products = response.data,
-      error: error => console.log(error),
-      complete  : () => console.log('complete'),      
-    })
+    next: response => this.products = response.data,
+    error: error => console.log(error),
+  
+  })
   }
 
 }
