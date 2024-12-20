@@ -8,6 +8,8 @@ import { ProductItemComponent } from "./product-item/product-item.component";
 import { MatButton } from '@angular/material/button';
 import { FiltersDialogComponent } from './filters-dialog/filters-dialog.component';
 import { MatIcon } from '@angular/material/icon';
+import {MatMenu, MatMenuTrigger} from '@angular/material/menu'
+import { MatListOption, MatSelectionList, MatSelectionListChange } from '@angular/material/list';
 
 @Component({
   selector: 'app-shop',
@@ -16,7 +18,11 @@ import { MatIcon } from '@angular/material/icon';
     MatCard,
     ProductItemComponent,
     MatButton,
-    MatIcon
+    MatIcon,
+    MatMenu,
+    MatSelectionList,
+    MatListOption,
+    MatMenuTrigger
 ],
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.scss'
@@ -30,6 +36,12 @@ export class ShopComponent implements OnInit{
   products:Product[] = [];
   selectedBrands:string[] = [];
   selectedTypes:string[] = [];
+  selectedSort:string = 'name';
+  sortOptions = [
+    { name: 'Alphabetical' , value:'name'},
+    { name: 'price: Low-High' , value:'priceAsc'},
+    { name: 'price: High-Low' , value:'priceDsc'},
+  ]
 
 
 
@@ -39,11 +51,26 @@ export class ShopComponent implements OnInit{
   initializeShope(){
    this.shopeService.getBrands();
    this.shopeService.getTypes();
-   this.shopeService.getProducts().subscribe({
-    next: response => this.products = response.data,
-    error: error => console.log(error),
-  
-  })
+   this.getProducts();
+   
+  }
+
+
+  getProducts(){
+    this.shopeService.getProducts(this.selectedBrands,this.selectedTypes, this.selectedSort).subscribe({
+      next: response => this.products = response.data,
+      error: error => console.log(error),
+    
+    })
+  }
+
+  onSortChange(event:MatSelectionListChange){
+     const selectedOption = event.options[0];  // grap the first element 
+     if(selectedOption){
+      this.selectedSort = selectedOption.value;
+     this.getProducts();
+      
+     }
   }
   
 
@@ -63,11 +90,7 @@ export class ShopComponent implements OnInit{
           this.selectedBrands = result.selectedBrands;
           this.selectedTypes = result.selectedTypes;
           //apply filters
-            this,this.shopeService.getProducts(this.selectedBrands , this.selectedTypes).subscribe({
-            next:response => this.products = response.data,
-            error: error => console.log(error),
-            
-          })
+            this.getProducts();
           
         }
       }
