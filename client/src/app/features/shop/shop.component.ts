@@ -10,6 +10,7 @@ import { FiltersDialogComponent } from './filters-dialog/filters-dialog.componen
 import { MatIcon } from '@angular/material/icon';
 import {MatMenu, MatMenuTrigger} from '@angular/material/menu'
 import { MatListOption, MatSelectionList, MatSelectionListChange } from '@angular/material/list';
+import { ShopeParams } from '../../shared/models/shopParams';
 
 @Component({
   selector: 'app-shop',
@@ -34,15 +35,14 @@ export class ShopComponent implements OnInit{
   private dialogService = inject(MatDialog);
 
   products:Product[] = [];
-  selectedBrands:string[] = [];
-  selectedTypes:string[] = [];
-  selectedSort:string = 'name';
+
   sortOptions = [
     { name: 'Alphabetical' , value:'name'},
     { name: 'price: Low-High' , value:'priceAsc'},
     { name: 'price: High-Low' , value:'priceDsc'},
   ]
-
+  
+  shopParams = new ShopeParams;
 
 
   ngOnInit(): void {
@@ -57,7 +57,7 @@ export class ShopComponent implements OnInit{
 
 
   getProducts(){
-    this.shopeService.getProducts(this.selectedBrands,this.selectedTypes, this.selectedSort).subscribe({
+    this.shopeService.getProducts(this.shopParams).subscribe({
       next: response => this.products = response.data,
       error: error => console.log(error),
     
@@ -67,7 +67,7 @@ export class ShopComponent implements OnInit{
   onSortChange(event:MatSelectionListChange){
      const selectedOption = event.options[0];  // grap the first element 
      if(selectedOption){
-      this.selectedSort = selectedOption.value;
+      this.shopParams.sort = selectedOption.value;
      this.getProducts();
       
      }
@@ -78,8 +78,8 @@ export class ShopComponent implements OnInit{
     const  dialogRef = this.dialogService.open(FiltersDialogComponent , {
       minWidth:'500px',
       data: {
-        selectedBrands: this.selectedBrands,
-        selectedTypes: this.selectedTypes,
+        selectedBrands: this.shopParams.brands,
+        selectedTypes: this.shopParams.types,
       }
     });
 
@@ -87,8 +87,8 @@ export class ShopComponent implements OnInit{
       next: result => {
         if(result) {
           console.log(result);
-          this.selectedBrands = result.selectedBrands;
-          this.selectedTypes = result.selectedTypes;
+          this.shopParams.brands = result.selectedBrands;
+          this.shopParams.types = result.selectedTypes;
           //apply filters
             this.getProducts();
           
